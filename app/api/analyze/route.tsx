@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { AutoTokenizer, AutoModelForSequenceClassification } from '@transformers';
-import * as torch from 'torch';
+import { AutoTokenizer, AutoModelForSequenceClassification } from '@huggingface/transformers';
 import { google } from 'googleapis';
 import { Counter } from 'collections';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import * as dotenv from 'dotenv';
-import re from 're';
 
 dotenv.config();
 
@@ -18,13 +16,13 @@ const model = AutoModelForSequenceClassification.from_pretrained(model_name);
 const analyzeSentiment = async (text) => {
   const inputs = tokenizer(text, { return_tensors: "pt", truncation: true, padding: true });
   const outputs = await model(inputs);
-  const probabilities = torch.softmax(outputs.logits, -1);
+  const probabilities = outputs.logits.softmax(-1);
   const sentiment = probabilities[0][1].item() > probabilities[0][0].item() ? "positive" : "negative";
   return sentiment;
 };
 
 const extractVideoId = (url) => {
-  const match = re.search(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/, url);
+  const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
   return match ? match[1] : null;
 };
 
