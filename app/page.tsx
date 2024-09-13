@@ -21,6 +21,7 @@ import { signOut } from "next-auth/react";
 
 
 
+
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -58,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className=" mb-8 ">
         <div className="flex items-center  flex-col  justify-center">
           <div className="w-20 h-20 rounded-full bg-[#F8EF6D] mr-3"></div>
-            <h2 className="text-lg font-semibold dark:text-white">{username}</h2>
+            <h2 className="text-lg font-bold dark:text-white">{username}</h2>
           
         </div>
         <button className="lg:hidden" onClick={() => setIsOpen(false)}>
@@ -213,7 +214,14 @@ const Dashboard = () => {
   
       if (analyzeResponse.ok) {
         const data = await analyzeResponse.json();
+        console.log("------------------>>>>",data)
+        settitle(data.title)
+        setview(data.views)
+        setsentiment(data.sentiment)
+        setlike(data.likes)
         setVideoData(data);
+        setpositivecomments(data.positiveCommentCount)
+        setnegative(data.negativeCommentCount)
         if (!isDuplicate) {
           setHistory([{ url: inputUrl, data }, ...history]); // Add to history if not a duplicate
         }
@@ -372,66 +380,37 @@ const handleDeleteAccount = async () => {
               <div className="flex-1 bg-gray-50 dark:bg-black overflow-x-hidden">
                 <div className="p-4 lg:p-8 ">
                   <div className="grid text-black grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[80vh] ">
-                    <div className="bg-[#F8EF6D] p-4 lg:p-6 rounded-lg">
-                      <h3 className="text-lg font-semibold text-black mb-4">
-                        <span className="font-bold">
-
-                        Title:  
-                        </span>
+                    <div className="bg-[#F8EF6D] p-4 lg:p-6 rounded-lg flex items-center justify-center flex-col">
+                        <span className="font-bold text-5xl">Title</span>
+                      <h3 className=" font-bold text-black mb-4 text-3xl">
                         {title}
                       </h3>
-                      <h3 className="text-lg font-semibold text-black mb-4">
-                      <span className="font-bold">
-                          
-                      Views: 
-                          </span>
-                       {view}
-                      </h3>
-                      <h3 className="text-lg font-semibold text-black mb-4">
-                      <span className="font-bold">
-                          
-                      Likes: 
-                          </span>
-                       {like}
-                      </h3>
-                      <h3 className="text-lg font-semibold text-black mb-4">
-                      <span className="font-bold">
-                          
-                      Sentiment:
-                          </span>
-                        {sentiment}
-                      </h3>
+                     
                       
                       
                     </div>
-                    <div className="bg-[#2B2D32] p-4 lg:p-8 rounded-lg text-white   flex flex-col justify-between">
-                      <div className="flex  justify-between items-start h-fit">
-                        <h3 className="text-sm hover:bg-[#F8EF6D] hover:text-black hover:border-none mb-4 border-2 border-[#35363B] w-fit px-5 py-1 hover:cursor-pointer rounded-full">
-                          Full Report
-                        </h3>
-                        <p className="text-sm text-[#F8EF6D] font-bold mb-4">
-                          2024
-                        </p>
-                      </div>
-                      <div className="button border-2 border-[#A59F9F] py-5 px-4 rounded-3xl flex justify-between ">
-                        <p>Download Report</p>
-                        <div className="border-2 h-full"></div>
-                        <Image src={downloadicon} alt="" />
-                      </div>
+                    <div className="bg-[#2B2D32] p-4 lg:p-8 rounded-lg text-white   flex flex-col items-center justify-center">
+                    <span className="font-bold text-5xl">Views</span>
+                      <h3 className=" font-bold  mb-4 text-3xl text-white break-words text-wrap">
+                        {view}
+                      </h3>
                     </div>
-                    <div className="bg-[#D6D6D6] dark:bg-[#D6D6D6] p-4 lg:p-6 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-4 text-black">
+
+
+
+                    <div className="bg-[#D6D6D6] p-4 lg:p-6 rounded-lg">
+                      <h3 className="text-lg font-bold mb-4 text-black">
                         Comments
                       </h3>
                       <div className="flex justify-between  mb-4  max-w-[50%] m-auto">
                       <div className="py-8 px-2  rounded-md flex items-center justify-center bg-[#F8EF6D] w-[4.5rem]">
-                          <span className="text-sm lg:text-lg font-semibold text-black ">
+                          <span className="text-sm lg:text-lg font-bold text-black ">
                             
                             {positivecomments}
                           </span>
                         </div>
                         <div className="py-8 px-2 border-2  border-black rounded-md flex items-center justify-center w-[4.5rem]">
-                          <span className="text-sm lg:text-lg font-semibold text-black ">
+                          <span className="text-sm lg:text-lg font-bold text-black ">
                           {negativecomments}
                           </span>
                         </div>
@@ -449,26 +428,20 @@ const handleDeleteAccount = async () => {
                           </div>
                       </div>
                     </div>
-                    <div className="bg-gray-800 p-4 lg:p-6 rounded-lg text-white">
-                      <h3 className="text-lg font-semibold mb-4">ROL</h3>
-                      <div className="text-3xl lg:text-4xl font-bold mb-2">
-                        283%
-                      </div>
-                      <p className="text-gray-400 text-sm lg:text-base">
-                        Return On Investment
-                      </p>
-                      <div className="mt-4 h-12 lg:h-16 flex items-end">
-                        <div className="w-1/5 h-1/4 bg-[#F8EF6D] rounded-full"></div>
-                        <div className="w-1/5 h-1/2 bg-[#F8EF6D] rounded-full mx-1"></div>
-                        <div className="w-1/5 h-1/3 bg-[#F8EF6D] rounded-full"></div>
-                        <div className="w-1/5 h-2/3 bg-[#F8EF6D] rounded-full mx-1"></div>
-                        <div className="w-1/5 h-full bg-[#F8EF6D] rounded-full"></div>
-                      </div>
+
+
+
+                    <div className="bg-gray-800 p-4 lg:p-6 rounded-lg text-white flex flex-col items-center justify-center">
+                    <span className="font-bold text-5xl">Likes</span>
+                      <h3 className="font-bold  mb-4 text-3xl text-white break-words text-wrap">
+                        {like}
+                      </h3>                 
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg flex items-center justify-center">
-                      <button className="bg-[#F8EF6D] text-black px-4 lg:px-6 py-2 lg:py-3 rounded-md font-semibold text-sm lg:text-base">
-                        Web Score with AI
-                      </button>
+                    <div className=" bg-[#D6D6D6] p-4 lg:p-6 rounded-lg flex flex-col items-center justify-center">
+                    <span className="font-bold text-5xl">Sentiment</span>
+                      <h3 className="font-bold  mb-4 text-3xl text-black break-words text-wrap">
+                        {sentiment}
+                      </h3>
                     </div>
 
 
@@ -560,7 +533,7 @@ const handleDeleteAccount = async () => {
       <div className="flex flex-col items-center mb-6">
         {/* Yellow circle instead of user image */}
         <div className="w-20 h-20 bg-yellow-400 rounded-full"></div>
-        <h2 className="text-2xl font-semibold mt-4 text-white">
+        <h2 className="text-2xl font-bold mt-4 text-white">
           {userData.username || "Username"} {/* Replace with fetched username */}
         </h2>
         <p className="text-gray-400">{userData.email || "user@example.com"}</p>
