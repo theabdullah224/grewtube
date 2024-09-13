@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="logo mb-20">
         <h1>LOGO</h1>
       </div>
-      <div className=" mb-8 ">
+      {/* <div className=" mb-8 ">
         <div className="flex items-center  flex-col  justify-center">
           <div className="w-20 h-20 rounded-full bg-[#F8EF6D] mr-3"></div>
             <h2 className="text-lg font-bold dark:text-white">{username}</h2>
@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <button className="lg:hidden" onClick={() => setIsOpen(false)}>
           <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
         </button>
-      </div>
+      </div> */}  
       {tabs.map((tab) => (
         <button
           key={tab.title}
@@ -266,6 +266,36 @@ const Dashboard = () => {
 // ----------------Setting Tab----------------------------------------
 const [userData, setUserData] = useState({ username: "", email: "" });
 const router = useRouter();
+const [currentPassword, setCurrentPassword] = useState('');
+const [newPassword, setNewPassword] = useState('');
+const [confirmPassword, setConfirmPassword] = useState('');
+const [successMessage, setSuccessMessage] = useState('');
+
+const changePassword = async () => {
+  const oldPassword = 'oldPassword123';
+  const newPassword = 'newPassword456';
+  const userId = 'user-id-here'; // Obtain this from session or user context
+
+  try {
+    const response = await fetch('/api/users/changePassword', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, oldPassword, newPassword }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Password changed successfully:', data.message);
+    } else {
+      console.error('Error changing password:', data.error);
+    }
+  } catch (error) {
+    console.error('Error making request:', error);
+  }
+};
+
 
 useEffect(() => {
   const fetchUserData = async () => {
@@ -356,18 +386,26 @@ const handleDeleteAccount = async () => {
 
                 Upgrade
                 </span>
-
               </button>
-                </Link>
-                <Link href="/login">
-              <button className="bg-[#F8EF6D]  px-4 py-2 rounded-md mr-4 text-sm lg:text-base">
-                <span className="text-black">
 
-                Login
-                </span>
 
-              </button>
+
                 </Link>
+                {session ? (
+        <button
+          className="border-2 border-[#F8EF6D] text-[#F8EF6D]  px-4 py-2 rounded-md mr-4 text-sm lg:text-base"
+          onClick={() => signOut({ callbackUrl: "/login" })} // Sign out and redirect to login page
+        >
+          <span className="text-[#F8EF6D]">Logout</span>
+        </button>
+      ) : (
+        // If no session, show the "Login" button
+        <Link href="/login">
+          <button className="bg-[#F8EF6D] px-4 py-2 rounded-md mr-4 text-sm lg:text-base">
+            <span className="text-black">Login</span>
+          </button>
+        </Link>
+      )}
               
             </div>
           </div>
@@ -525,46 +563,46 @@ const handleDeleteAccount = async () => {
 
   {/* --------------------------Setting---------------------------------------------------------------------------- */}
         
-          {activeTab === "Setting" && (
-            <div className="text-black">
-              <h2>Setting Section</h2>
-              <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
-      {/* User Profile Section */}
-      <div className="flex flex-col items-center mb-6">
-        {/* Yellow circle instead of user image */}
-        <div className="w-20 h-20 bg-yellow-400 rounded-full"></div>
-        <h2 className="text-2xl font-bold mt-4 text-white">
-          {userData.username || "Username"} {/* Replace with fetched username */}
-        </h2>
-        <p className="text-gray-400">{userData.email || "user@example.com"}</p>
+            {activeTab === "Setting" && (
+              <div className="text-black">
+                <h2>Setting Section</h2>
+                <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
+        {/* User Profile Section */}
+        <div className="flex flex-col items-center mb-6">
+          {/* Yellow circle instead of user image */}
+          {/* <div className="w-20 h-20 bg-yellow-400 rounded-full"></div> */}
+          <h2 className="text-2xl font-bold mt-4 text-white">
+            {userData.username || "Username"} {/* Replace with fetched username */}
+          </h2>
+          <p className="text-gray-400">{userData.email || "user@example.com"}</p>
+        </div>
+
+        {/* Settings Options */}
+        <div className="w-full max-w-sm">
+          <button
+            className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+            onClick={changePassword} // Change to your change password route
+          >
+            Change Password
+          </button>
+
+          <button
+            className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+
+          <button
+            className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300 text-left"
+            onClick={handleDeleteAccount}
+          >
+            Delete Account
+          </button>
+        </div>
       </div>
-
-      {/* Settings Options */}
-      <div className="w-full max-w-sm">
-        <button
-          className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-          onClick={() => router.push("/change-password")} // Change to your change password route
-        >
-          Change Password
-        </button>
-
-        <button
-          className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-
-        <button
-          className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300 text-left"
-          onClick={handleDeleteAccount}
-        >
-          Delete Account
-        </button>
-      </div>
-    </div>
-            </div>
-          )}
+              </div>
+            )}
 
   {/* --------------------------------------------------------------------------------------------------------------- */}
         </div>

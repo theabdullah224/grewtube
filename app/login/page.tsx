@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import React, { useState, FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -7,57 +7,55 @@ import emailIcon from '../../public/email.svg';
 import lock from '../../public/lock.svg';
 import Link from "next/link";
 
+// Hardcoded admin credentials
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_PASSWORD = "123456";
+
 const LoginSignup = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-    // Hardcoded admin credentials
-  const ADMIN_EMAIL = "admin@gmail.com";
-  const ADMIN_PASSWORD = "123456";
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-  
+
     const { email, password } = formData;
-  
+
     // Check if the user is the admin
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       // Redirect to admin panel
       router.push("/admin");
     } else {
-      // Call the sign-in method with email and password
+      // Call the sign-in method for non-admin users
       const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
         password: formData.password,
       });
-  
+
       if (result?.error) {
-       
+        // Handle sign-in error
         setError(result.error);
       } else {
         // If sign-in is successful, check if the user exists in the database
         const userExists = await checkIfUserExists(email, password);
-  
+
         if (userExists) {
-          // If the user exists, redirect to the user dashboard
+          // Redirect to the user dashboard
           router.push("/");
         } else {
-          // If the user does not exist, show an error message
+          // Show an error message if the user does not exist
           setError("No user available. Please sign up.");
         }
       }
     }
   };
-  
+
   // Function to check if a user exists in the database
   const checkIfUserExists = async (email: string, password: string) => {
     try {
@@ -68,6 +66,11 @@ const LoginSignup = () => {
         },
         body: JSON.stringify({ email, password }), // Send email and password to the API
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to check if user exists');
+      }
+
       const data = await response.json();
       return data.exists; // Return true if the user exists, otherwise false
     } catch (error) {
@@ -75,7 +78,7 @@ const LoginSignup = () => {
       return false;
     }
   };
-  
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
