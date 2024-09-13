@@ -1,7 +1,44 @@
+"use client"
 import React from 'react'
 import tick from '../../public/tickicon.svg'
 import Image from 'next/image'
-function page() {
+
+
+type Props = {
+  planType:String
+};
+
+
+const page: React.FC<Props> = ({ planType }) => {
+const handleClick = async (planType) => {
+    try {
+      // Make a POST request to the API route
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planType }),
+      });
+
+      // Check if the response is OK
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Something went wrong');
+      }
+
+      // Get the URL from the response
+      const { url } = await response.json();
+
+      // Redirect the user to the checkout session URL
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('Failed to create checkout session. Please try again.');
+    }
+  };
+
+
   return (
     <div>
        <div className="bg-[#232527] shadow-xl shadow-black min-h-screen flex flex-col items-center justify-center p-8">
@@ -29,7 +66,9 @@ function page() {
               <span className="text-yellow-400 mr-2"><Image src={tick} alt="" className='w-4' /></span> Roster files
             </li>
           </ul>
-          <button className="w-full bg-[#F8EF6D] text-black py-2 rounded-lg font-bold hover:bg-yellow-500 transition duration-300">
+          <button
+          onClick={() => handleClick('free')}
+          className="w-full bg-[#F8EF6D] text-black py-2 rounded-lg font-bold hover:bg-yellow-500 transition duration-300">
             Subscribe
           </button>
         </div>
@@ -56,7 +95,9 @@ function page() {
               <span className="text-yellow-400 mr-2"><Image src={tick} alt="" className='w-4' /></span> 200+ custom icons
             </li>
           </ul>
-          <button className="w-full bg-[#F8EF6D] text-black py-2 rounded-lg font-bold hover:bg-yellow-500 transition duration-300">
+          <button
+           onClick={() => handleClick('pro')}
+          className="w-full bg-[#F8EF6D] text-black py-2 rounded-lg font-bold hover:bg-yellow-500 transition duration-300">
             Subscribe
           </button>
         </div>

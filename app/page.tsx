@@ -8,6 +8,17 @@ import acitvity from "../public/activity.svg";
 import schedule from "../public/scheduale.svg";
 import setting from "../public/setting.svg";
 import Link from "next/link";
+import { Trash2 } from 'lucide-react';
+import { any } from "@tensorflow/tfjs";
+import ChartComponent from './components/ChartComponent'
+import Spinner from '../public/Spinner@1x-1.0s-200px-200px.svg';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { signOut } from "next-auth/react";
+
+
+
 
 
 interface SidebarProps {
@@ -32,6 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { title: "Schedule", image: "/scheduale.svg" },
     { title: "Setting", image: "/setting.svg" }
   ];
+  const [username, setusername] = useState("")
   
 
   return (
@@ -46,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className=" mb-8 ">
         <div className="flex items-center  flex-col  justify-center">
           <div className="w-20 h-20 rounded-full bg-[#F8EF6D] mr-3"></div>
-            <h2 className="text-lg font-semibold dark:text-white">Louis carter</h2>
+            <h2 className="text-lg font-semibold dark:text-white">{username}</h2>
           
         </div>
         <button className="lg:hidden" onClick={() => setIsOpen(false)}>
@@ -71,22 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           
         </button>
       ))}
-      <div className="mt-auto flex items-center">
-        <span className="mr-2 dark:text-white">Light</span>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className={`w-12 h-6 rounded-full p-1 ${
-            darkMode ? "bg-gray-700" : "bg-[#F8EF6D]"
-          }`}
-        >
-          <div
-            className={`w-4 h-4 rounded-full bg-white transform duration-300 ease-in-out ${
-              darkMode ? "translate-x-6" : ""
-            }`}
-          ></div>
-        </button>
-        <span className="ml-2 dark:text-white">Dark</span>
-      </div>
+     
     </div>
   );
 };
@@ -95,6 +92,224 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [title, settitle] = useState("")
+  const [view, setview] = useState("")
+  const [like, setlike] = useState("")
+  const [sentiment, setsentiment] = useState("")
+  const [positivecomments, setpositivecomments] = useState("")
+  const [negativecomments, setnegative] = useState("")
+  const [loading, setLoading] = useState(false);
+
+
+
+
+// ------------------Activity tab------------------------------------------
+
+  const [inputUrl, setInputUrl] = useState('');
+  const [videoData, setVideoData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession(); 
+  const [history, setHistory] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchSavedUrls = async () => {
+      if (!session || !session.user) return;
+  
+      try {
+        const response = await fetch('/api/users/saveUrl', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        const data = await response.json();
+        
+        if (response.ok) {
+          console.log('Fetched URLs:', data.urls); // Log the fetched URLs
+          setHistory(data.urls); // Update history with fetched URLs
+        } else {
+          console.error('Error fetching URLs:', data.error); // Log the error returned from the API
+          setError(data.error || 'Failed to fetch saved URLs.');
+        }
+      } catch (error) {
+        console.error('Fetch error:', error); // Log fetch-related errors
+        setError('An error occurred while fetching URLs.');
+      }
+    };
+  
+    fetchSavedUrls();
+  }, [session]);
+  
+  const handleAddUrl = async () => {
+    if (!session || !session.user) {
+      setError('User not authenticated. Please log in.');
+      setIsLoading(false);
+      return;
+    }
+  
+    const userId = session.user.id;
+  
+    // YouTube URL Validation
+    const isValidYoutubeUrl = (url: string) => {
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+      return youtubeRegex.test(url);
+    };
+  
+    if (!isValidYoutubeUrl(inputUrl)) {
+      setError('Invalid YouTube URL. Please provide a valid YouTube video URL.');
+      return; // Do not proceed if URL is invalid
+    }
+  
+    setIsLoading(true);
+    setError('');
+  
+    try {
+      // Check if the URL already exists in the user's saved URLs
+      const checkUrlResponse = await fetch(`/api/users/saveUrl`, {
+        method: 'GET',
+      });
+  
+      if (!checkUrlResponse.ok) {
+        const errorData = await checkUrlResponse.json();
+        setError(errorData.error || 'Error fetching saved URLs');
+        return;
+      }
+  
+      const savedUrls = await checkUrlResponse.json();
+  
+      // Check if the input URL already exists in the user's saved URLs
+      const isDuplicate = savedUrls.urls.some((urlObj: { url: string }) => urlObj.url === inputUrl);
+  
+      if (!isDuplicate) {
+        // If not a duplicate, save the URL in the database
+        const saveResponse = await fetch('/api/users/saveUrl', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ videoUrl: inputUrl, userId }), // Pass userId and videoUrl
+        });
+  
+        if (!saveResponse.ok) {
+          const saveErrorData = await saveResponse.json();
+          setError(saveErrorData.error || 'Failed to save the URL to the database');
+          return;
+        }
+      } else {
+        // Show a warning, but allow the video to be analyzed again
+        setError('This URL has already been saved, but it will be analyzed again.');
+      }
+  
+      // Proceed with analyzing the URL regardless of whether it's a duplicate
+      const analyzeResponse = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ videoUrl: inputUrl }),
+      });
+  
+      if (analyzeResponse.ok) {
+        const data = await analyzeResponse.json();
+        setVideoData(data);
+        if (!isDuplicate) {
+          setHistory([{ url: inputUrl, data }, ...history]); // Add to history if not a duplicate
+        }
+        setInputUrl('');
+        setActiveTab("Dashboard");
+      } else {
+        const errorData = await analyzeResponse.json();
+        setError(errorData.error || 'Failed to analyze the video');
+      }
+    } catch (error) {
+      setError('Error processing the request');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  
+  const handleDeleteUrl = async (urlId) => {
+    try {
+      const response = await fetch('/api/users/deleteUrl', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ urlId }), // Send the _id of the URL
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log('URL deleted successfully:', data);
+        // Update local history by removing the deleted URL from the UI
+        setHistory(history.filter(item => item._id !== urlId));
+      } else {
+        console.error('Error deleting URL:', data.error);
+      }
+    } catch (error) {
+      console.error('Error deleting URL:', error);
+    }
+  };
+  
+// ----------------Setting Tab----------------------------------------
+const [userData, setUserData] = useState({ username: "", email: "" });
+const router = useRouter();
+
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("/api/users/me"); // Assuming you have an API route to fetch user details
+      const data = await response.json();
+      setUserData({ username: data.username, email: data.email });
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
+  if (session) {
+    fetchUserData();
+  }
+}, [session]);
+const handleLogout = async () => {
+
+  await signOut({
+    redirect: false,
+  });
+
+
+  router.push("/login");
+};
+
+// Handle Delete Account
+
+const handleDeleteAccount = async () => {
+  const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("/api/users/deleteAccount", {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      // Redirect to login after successful account deletion
+      router.push("/signup");
+    } else {
+      const data = await response.json();
+      setError(data.error || "Failed to delete account.");
+    }
+  } catch (error) {
+    setError("An error occurred while deleting the account.");
+  }
+};
+
+// ----------------------------------------------------------------------
+
 
   return (
     <div
@@ -125,11 +340,7 @@ const Dashboard = () => {
               </h1>
             </div>
             <div className="flex items-center">
-              {/* <input
-                type="text"
-                placeholder="Search..."
-                className="hidden md:block mr-4 p-2 rounded-md bg-white dark:bg-gray-800 dark:text-white"
-              /> */}
+             
 
                 <Link href="/upgrade">
               <button className="bg-[#F8EF6D]  px-4 py-2 rounded-md mr-4 text-sm lg:text-base">
@@ -153,79 +364,45 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Conditionally render the content based on the active tab */}
+{/* ----------------Dashboard---------------------------Conditionally render the content based on the active tab-------------------------- */}
+        
           {activeTab === "Dashboard" && (
             <div className="text-black">
               <h2>Dashboard Content</h2>
-              {/* Place the dashboard-specific content here */}
               <div className="flex-1 bg-gray-50 dark:bg-black overflow-x-hidden">
                 <div className="p-4 lg:p-8 ">
-                  {/* <div className="flex justify-between items-center mb-8">
-    <div className="flex items-center">
-      <button
-        className="lg:hidden mr-4"
-        onClick={() => setSidebarOpen(true)}
-      >
-        <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-      </button>
-      <h1 className="text-2xl lg:text-3xl font-bold dark:text-white">
-        Statistics
-      </h1>
-    </div>
-    <div className="flex items-center">
-      <input
-        type="text"
-        placeholder="Search..."
-        className="hidden md:block mr-4 p-2 rounded-md bg-white dark:bg-gray-800 dark:text-white"
-      />
-      <button className="bg-[#F8EF6D] text-black px-4 py-2 rounded-md mr-4 text-sm lg:text-base">
-        Upgrade
-      </button>
-      <Bell className="text-gray-600 dark:text-gray-300" />
-    </div>
-  </div> */}
                   <div className="grid text-black grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 min-h-[80vh] ">
                     <div className="bg-[#F8EF6D] p-4 lg:p-6 rounded-lg">
                       <h3 className="text-lg font-semibold text-black mb-4">
-                        Website traffic
+                        <span className="font-bold">
+
+                        Title:  
+                        </span>
+                        {title}
                       </h3>
-                      <div className="flex justify-center items-center">
-                        <div className="relative w-24 h-24 lg:w-32 lg:h-32">
-                          <svg className="w-full h-full" viewBox="0 0 36 36">
-                            <path
-                              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="#444"
-                              strokeWidth="3"
-                              strokeDasharray="78, 100"
-                            />
-                            <path
-                              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-                              fill="none"
-                              stroke="#000"
-                              strokeWidth="3"
-                              strokeDasharray="22, 100"
-                            />
-                          </svg>
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl lg:text-2xl font-bold">
-                            12k
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span>Social Media</span>
-                          <span>78%</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>Organic Search</span>
-                          <span>22%</span>
-                        </div>
-                      </div>
+                      <h3 className="text-lg font-semibold text-black mb-4">
+                      <span className="font-bold">
+                          
+                      Views: 
+                          </span>
+                       {view}
+                      </h3>
+                      <h3 className="text-lg font-semibold text-black mb-4">
+                      <span className="font-bold">
+                          
+                      Likes: 
+                          </span>
+                       {like}
+                      </h3>
+                      <h3 className="text-lg font-semibold text-black mb-4">
+                      <span className="font-bold">
+                          
+                      Sentiment:
+                          </span>
+                        {sentiment}
+                      </h3>
+                      
+                      
                     </div>
                     <div className="bg-[#2B2D32] p-4 lg:p-8 rounded-lg text-white   flex flex-col justify-between">
                       <div className="flex  justify-between items-start h-fit">
@@ -244,27 +421,32 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-[#D6D6D6] dark:bg-[#D6D6D6] p-4 lg:p-6 rounded-lg">
                       <h3 className="text-lg font-semibold mb-4 text-black">
-                        Bunce Rate
+                        Comments
                       </h3>
-                      <div className="flex justify-between mb-4  max-w-[80%] m-auto">
-                        <div className="py-8 px-2 border-2  border-black rounded-md flex items-center justify-center">
+                      <div className="flex justify-between  mb-4  max-w-[50%] m-auto">
+                      <div className="py-8 px-2  rounded-md flex items-center justify-center bg-[#F8EF6D] w-[4.5rem]">
                           <span className="text-sm lg:text-lg font-semibold text-black ">
-                            Mon 2
+                            
+                            {positivecomments}
                           </span>
                         </div>
-                        <div className="py-8 px-2  rounded-md flex items-center justify-center bg-[#F8EF6D]">
+                        <div className="py-8 px-2 border-2  border-black rounded-md flex items-center justify-center w-[4.5rem]">
                           <span className="text-sm lg:text-lg font-semibold text-black ">
-                            Mon 2
+                          {negativecomments}
                           </span>
                         </div>
-                        <div className="py-8 px-2 border-2  border-black rounded-md flex items-center justify-center">
-                          <span className="text-sm lg:text-lg font-semibold text-black ">
-                            Mon 2
-                          </span>
-                        </div>
+                        
+                       
                       </div>
-                      <div className="text-3xl lg:text-4xl font-bold mb-2 text-black">
-                        23%
+                      <div className=" mb-2 text-black">
+                          <div className="flex items-center   gap-2">
+                            <div className="h-4 w-4 bg-[#F8EF6D]"></div>
+                            <p>Positive</p>
+                          </div>
+                          <div className="flex items-center   gap-2">
+                            <div className="h-4 w-4 border-2 border-black"></div>
+                            <p>Negative</p>
+                          </div>
                       </div>
                     </div>
                     <div className="bg-gray-800 p-4 lg:p-6 rounded-lg text-white">
@@ -288,49 +470,78 @@ const Dashboard = () => {
                         Web Score with AI
                       </button>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-4 dark:text-white">
-                        Customer Churn Rate
-                      </h3>
-                      <div className="h-24 lg:h-32 flex items-end">
-                        <div className="w-1/6 h-1/6 bg-gray-200 dark:bg-gray-700 rounded-t-md"></div>
-                        <div className="w-1/6 h-1/3 bg-gray-200 dark:bg-gray-700 rounded-t-md mx-1"></div>
-                        <div className="w-1/6 h-full bg-[#F8EF6D] rounded-t-md"></div>
-                        <div className="w-1/6 h-1/2 bg-gray-200 dark:bg-gray-700 rounded-t-md mx-1"></div>
-                        <div className="w-1/6 h-1/4 bg-gray-200 dark:bg-gray-700 rounded-t-md"></div>
-                        <div className="w-1/6 h-5/12 bg-gray-200 dark:bg-gray-700 rounded-t-md ml-1"></div>
-                      </div>
-                      <div className="text-center mt-2 dark:text-white">
-                        12.8%
-                      </div>
-                    </div>
+
+
+
+
+
+                    <div className="bg-[rgb(43,45,50)] p-4 lg:p-6 rounded-lg">
+      <h2 className="text-center text-white text-lg mb-4">Comment Sentiment Analysis</h2>
+      <ChartComponent  positivechart={positivecomments} negativechart={negativecomments} />
+    </div>
+
+
+
+
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Place the activity-specific content here */}
-          {activeTab === "Activity" && (
-            <div className="text-black">
-              <h2>Activity Section</h2>
-              <div className="border-2 border-gray-300 rounded-lg p-4 h-full ">
-                <div className="flex space-x-4 mb-4">
-                  <input
-                    className="bg-transparent border-2 border-gray-400 rounded-lg placeholder-gray-400 text-white py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                    type="url"
-                    placeholder="Enter something..."
-                  />
-                  <button className="bg-[#F8EF6D] text-black font-bold py-2 px-6 rounded-lg hover:bg-[#F8EF6D] transition duration-300">
-                    Add
-                  </button>
-                </div>
-                <div className="history bg-gray-800 p-4 rounded-lg text-white">
-                  {/* History items go here */}
-                </div>
-              </div>
-            </div>
-          )}
+
+{/* ---------------------------------------------Activity Tab--------------------------------------------------------- */}
+
+{activeTab === "Activity" && (
+<div className="text-black">
+      <h2>Activity Section</h2>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-full w-full ">
+          <Image src={Spinner} alt="Loading..." className="w-52" />
+        </div>
+      ) : (
+        <div className="border-gray-300 rounded-lg p-4 h-full">
+          <div className="flex space-x-4 mb-4">
+            <input
+              className="bg-transparent border-2 border-gray-400 rounded-lg placeholder-gray-400 text-white py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              type="url"
+              placeholder="Enter YouTube URL..."
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+            />
+            <button
+              className="bg-[#F8EF6D] text-black font-bold py-2 px-6 rounded-lg hover:bg-[#F8EF6D] transition duration-300"
+              onClick={handleAddUrl}
+            >
+              Add
+            </button>
+          </div>
+          {error && <p className="text-red-500 mb-2">{error}</p>}
+
+          <div className="history bg-gray-800 p-4 rounded-lg text-white">
+            {history.map((item) => (
+  <div key={item._id} className="mb-2 flex justify-between items-center">
+    <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+      {item.url}
+    </a>
+    <button
+      onClick={() => handleDeleteUrl(item._id)} // Pass the _id to handleDeleteUrl
+      className="text-red-500 hover:text-red-700 transition duration-300"
+    >
+      <Trash2 size={20} />
+    </button>
+  </div>
+))}
+
+          </div>
+        </div>
+      )}
+    </div>
+ )} 
+
+
+
+{/* ---------------------------------------------------------------------------------------------------------------- */}
 
           {activeTab === "Schedule" && (
             <div className="text-black">
@@ -338,12 +549,51 @@ const Dashboard = () => {
               {/* Place the schedule-specific content here */}
             </div>
           )}
+
+  {/* --------------------------Setting---------------------------------------------------------------------------- */}
+        
           {activeTab === "Setting" && (
             <div className="text-black">
               <h2>Setting Section</h2>
-              {/* Place the setting-specific content here */}
+              <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
+      {/* User Profile Section */}
+      <div className="flex flex-col items-center mb-6">
+        {/* Yellow circle instead of user image */}
+        <div className="w-20 h-20 bg-yellow-400 rounded-full"></div>
+        <h2 className="text-2xl font-semibold mt-4 text-white">
+          {userData.username || "Username"} {/* Replace with fetched username */}
+        </h2>
+        <p className="text-gray-400">{userData.email || "user@example.com"}</p>
+      </div>
+
+      {/* Settings Options */}
+      <div className="w-full max-w-sm">
+        <button
+          className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+          onClick={() => router.push("/change-password")} // Change to your change password route
+        >
+          Change Password
+        </button>
+
+        <button
+          className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+
+        <button
+          className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300 text-left"
+          onClick={handleDeleteAccount}
+        >
+          Delete Account
+        </button>
+      </div>
+    </div>
             </div>
           )}
+
+  {/* --------------------------------------------------------------------------------------------------------------- */}
         </div>
       </div>
     </div>
@@ -351,3 +601,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
