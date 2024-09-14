@@ -16,7 +16,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from "next-auth/react";
-
+import Logo from '../public/logo.png'
 
 
 
@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       } lg:relative lg:translate-x-0  transition duration-200 ease-in-out lg:flex lg:flex-col w-64 min-h-screen bg-black p-4 z-30 `}
     >
       <div className="logo mb-20">
-        <h1>LOGO</h1>
+       <Image src={Logo} alt="" className="w-54"/>
       </div>
       {/* <div className=" mb-8 ">
         <div className="flex items-center  flex-col  justify-center">
