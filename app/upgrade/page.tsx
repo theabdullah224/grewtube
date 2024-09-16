@@ -4,12 +4,10 @@ import tick from '../../public/tickicon.svg'
 import Image from 'next/image'
 
 
-type Props = {
-  planType:String
-};
 
 
-const page: React.FC<Props> = () => {
+
+const page = () => {
 const handleClick = async (planType) => {
     try {
       // Make a POST request to the API route
