@@ -73,7 +73,6 @@ export const authOptions: NextAuthOptions = {
       },
     },
     secret: process.env.JWT_SECRET, // Ensure you have the JWT secret set in your .env file
-  };
+};
 
-
-  export default authOptions;
+export default authOptions;
