@@ -265,42 +265,19 @@ const Dashboard = () => {
   
 // ----------------Setting Tab----------------------------------------
 const [userData, setUserData] = useState({ username: "", email: "" });
-const router = useRouter();
 const [currentPassword, setCurrentPassword] = useState('');
 const [newPassword, setNewPassword] = useState('');
 const [confirmPassword, setConfirmPassword] = useState('');
 const [successMessage, setSuccessMessage] = useState('');
+const [errorMessage, setErrorMessage] = useState('');
+const [showPasswordFields, setShowPasswordFields] = useState(false); // To toggle visibility of password fields
+const router = useRouter();
 
-const changePassword = async () => {
-  const oldPassword = 'oldPassword123';
-  const newPassword = 'newPassword456';
-  const userId = 'user-id-here'; // Obtain this from session or user context
-
-  try {
-    const response = await fetch('/api/users/changePassword', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, oldPassword, newPassword }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('Password changed successfully:', data.message);
-    } else {
-      console.error('Error changing password:', data.error);
-    }
-  } catch (error) {
-    console.error('Error making request:', error);
-  }
-};
-
-
+// Fetch User Data
 useEffect(() => {
   const fetchUserData = async () => {
     try {
-      const response = await fetch("/api/users/me"); // Assuming you have an API route to fetch user details
+      const response = await fetch("/api/users/me");
       const data = await response.json();
       setUserData({ username: data.username, email: data.email });
     } catch (error) {
@@ -312,18 +289,67 @@ useEffect(() => {
     fetchUserData();
   }
 }, [session]);
+
+// Handle Password Change
+const changePassword = async () => {
+  // Validate password length
+  if (newPassword.length < 6) {
+    setErrorMessage("New password must be at least 6 characters long.");
+    return;
+  }
+
+  // Ensure newPassword matches confirmPassword
+  if (newPassword !== confirmPassword) {
+    setErrorMessage("New password and confirmation do not match.");
+    return;
+  }
+
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    setErrorMessage("User ID not found. Please log in.");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/users/changePassword', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        oldPassword: currentPassword,
+        newPassword,
+      }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      setSuccessMessage('Password changed successfully.');
+      setErrorMessage('');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      // Redirect to login page after password change
+      await signOut({ redirect: false });
+      router.push("/login");
+    } else {
+      setErrorMessage(data.error || 'Failed to change password.');
+    }
+  } catch (error) {
+    setErrorMessage('An error occurred while changing the password.');
+    console.error('Error making request:', error);
+  }
+};
+
 const handleLogout = async () => {
-
-  await signOut({
-    redirect: false,
-  });
-
-
+  await signOut({ redirect: false });
   router.push("/login");
 };
 
 // Handle Delete Account
-
 const handleDeleteAccount = async () => {
   const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
 
@@ -335,17 +361,15 @@ const handleDeleteAccount = async () => {
     });
 
     if (response.ok) {
-      // Redirect to login after successful account deletion
       router.push("/signup");
     } else {
       const data = await response.json();
-      setError(data.error || "Failed to delete account.");
+      setErrorMessage(data.error || "Failed to delete account.");
     }
   } catch (error) {
-    setError("An error occurred while deleting the account.");
+    setErrorMessage("An error occurred while deleting the account.");
   }
 };
-
 // ----------------------------------------------------------------------
 
 
@@ -562,47 +586,85 @@ const handleDeleteAccount = async () => {
           )}
 
   {/* --------------------------Setting---------------------------------------------------------------------------- */}
-        
-            {activeTab === "Setting" && (
-              <div className="text-black">
-                <h2>Setting Section</h2>
-                <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
-        {/* User Profile Section */}
-        <div className="flex flex-col items-center mb-6">
-          {/* Yellow circle instead of user image */}
-          {/* <div className="w-20 h-20 bg-yellow-400 rounded-full"></div> */}
-          <h2 className="text-2xl font-bold mt-4 text-white">
-            {userData.username || "Username"} {/* Replace with fetched username */}
-          </h2>
-          <p className="text-gray-400">{userData.email || "user@example.com"}</p>
-        </div>
+<div className="text-black">
+      {activeTab === "Setting" && (
+        <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
+          {/* User Profile Section */}
+          <div className="flex flex-col items-center mb-6">
+            <h2 className="text-2xl font-bold mt-4 text-white">
+              {userData.username || "Username"}
+            </h2>
+            <p className="text-gray-400">{userData.email || "user@example.com"}</p>
+          </div>
 
-        {/* Settings Options */}
-        <div className="w-full max-w-sm">
-          <button
-            className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-            onClick={changePassword} // Change to your change password route
-          >
-            Change Password
-          </button>
+          {/* Settings Options */}
+          <div className="w-full max-w-sm">
+            {/* Change Password Button */}
+            {!showPasswordFields && (
+              <button
+                className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+                onClick={() => setShowPasswordFields(true)} // Show password fields on click
+              >
+                Change Password
+              </button>
+            )}
 
-          <button
-            className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+            {/* Show password fields when the button is clicked */}
+            {showPasswordFields && (
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">Change Password</h3>
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full mb-3 p-2 border rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full mb-3 p-2 border rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full mb-3 p-2 border rounded"
+                />
+                <button
+                  className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300"
+                  onClick={changePassword}
+                >
+                  Submit
+                </button>
 
-          <button
-            className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300 text-left"
-            onClick={handleDeleteAccount}
-          >
-            Delete Account
-          </button>
-        </div>
-      </div>
+                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+                {successMessage && <p className="text-green-500">{successMessage}</p>}
               </div>
             )}
+
+            {/* Logout Button */}
+            <button
+              className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+
+            {/* Delete Account Button */}
+            <button
+              className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300"
+              onClick={handleDeleteAccount}
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
 
   {/* --------------------------------------------------------------------------------------------------------------- */}
         </div>

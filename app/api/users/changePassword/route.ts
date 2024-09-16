@@ -4,12 +4,18 @@ import mongoose from 'mongoose';
 import User from '@/models/userModel';
 import { connect } from '@/dbConfig/dbConfig';
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const { userId, oldPassword, newPassword } = await req.json();
 
+    // Log incoming request data for debugging
+    console.log("Received userId:", userId);
+    console.log("Received oldPassword:", oldPassword);
+    console.log("Received newPassword:", newPassword);
+
     // Ensure all inputs are provided
     if (!userId || !oldPassword || !newPassword) {
+      console.error("Missing fields: ", { userId, oldPassword, newPassword });
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
@@ -18,22 +24,28 @@ export async function POST(req: Request) {
 
     // Validate if userId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error("Invalid userId format: ", userId);
       return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
     }
 
-    // Convert userId to ObjectId
-    const objectId = new mongoose.Types.ObjectId(userId);
-
     // Find the user by ObjectId
-    const user = await User.findById(objectId);
+    const user = await User.findById(userId);
     if (!user) {
+      console.error("User not found for userId: ", userId);
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Verify old password
     const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isPasswordValid) {
+      console.error("Incorrect old password");
       return NextResponse.json({ error: 'Incorrect old password' }, { status: 400 });
+    }
+
+    // Ensure the new password is different from the old password
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return NextResponse.json({ error: 'New password cannot be the same as the old password' }, { status: 400 });
     }
 
     // Hash the new password and update the user record
@@ -47,3 +59,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
