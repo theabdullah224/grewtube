@@ -4,7 +4,7 @@ import User from "@/models/userModel";
 import { connect } from "@/dbConfig/dbConfig";
 import { NextAuthOptions } from "next-auth";
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
     providers: [
       CredentialsProvider({
         name: "Credentials",
@@ -24,7 +24,9 @@ export const authOptions: NextAuthOptions = {
           const { email, password } = credentials;
   
           // Find user by email
-          const user = await User.findOne({ email }) as User | null;
+          const user = await User.findOne({ email }) as typeof User | null;
+
+
   
           // If user is not found, throw an error
           if (!user) {
@@ -75,4 +77,4 @@ export const authOptions: NextAuthOptions = {
     secret: process.env.JWT_SECRET, // Ensure you have the JWT secret set in your .env file
 };
 
-export default authOptions;
+export { authOptions };
