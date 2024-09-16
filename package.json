@@ -18,7 +18,7 @@
     "axios": "^1.7.7",
     "base-64": "^1.0.0",
     "bcryptjs": "^2.4.3",
-    "chart.js": "^4.1.1",
+    "chart.js": "^3.5.1",
     "chartjs-node-canvas": "^4.1.6",
     "class-transformer": "^0.5.1",
     "collections": "^5.1.13",
