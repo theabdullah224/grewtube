@@ -1,4 +1,3 @@
-
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/models/userModel";
@@ -75,4 +74,6 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.JWT_SECRET, // Ensure you have the JWT secret set in your .env file
   };
-  
+
+
+  export default authOptions;
