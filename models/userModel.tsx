@@ -4,7 +4,7 @@ interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  // role: string; 
+  role: string; 
   links: { url: string; createdAt: Date }[];
 }
 
@@ -23,10 +23,10 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
-  // role: {
-  //   type: String,
-  //   default: 'user', // Default role is 'user', can also be 'admin'
-  // },
+  role: {
+    type: String,
+    default: 'user', // Default role is 'user', can also be 'admin'
+  },
   links: [
     {
       _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
@@ -44,3 +44,5 @@ const userSchema = new Schema<IUser>({
 
 const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
 export default User;
+
+
