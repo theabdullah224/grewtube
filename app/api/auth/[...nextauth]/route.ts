@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { authOptions } from "./authOptions";
+import authOptions from "./authOptions";
 
 // Export the NextAuth handler as GET and POST
 const handler = NextAuth(authOptions);
