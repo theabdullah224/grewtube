@@ -9,7 +9,7 @@ type Props = {
 };
 
 
-const page: React.FC<Props> = ({ planType }) => {
+const page: React.FC<Props> = () => {
 const handleClick = async (planType) => {
     try {
       // Make a POST request to the API route
