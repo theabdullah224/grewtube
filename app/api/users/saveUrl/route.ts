@@ -6,7 +6,7 @@ import User from "@/models/userModel";
 // Ensure MongoDB is connected
 connect();
 
-export async function handler(request: NextRequest) {
+async function handleRequest(request: NextRequest, method: string) {
   try {
     // Get the user's token
     const token = await getToken({ req: request, secret: process.env.JWT_SECRET });
@@ -17,16 +17,15 @@ export async function handler(request: NextRequest) {
 
     const userEmail = token.email;
 
-    // Handle different HTTP methods
-    if (request.method === "POST") {
+    // Find the user by email
+    const user = await User.findOne({ email: userEmail });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (method === "POST") {
       const { videoUrl } = await request.json();
-
-      // Find the user by email
-      const user = await User.findOne({ email: userEmail });
-
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
 
       // Add the new URL to the user's links array
       user.links.push({ url: videoUrl, createdAt: new Date() });
@@ -37,14 +36,7 @@ export async function handler(request: NextRequest) {
       // Respond with the updated links array
       return NextResponse.json({ message: "URL saved successfully", links: updatedUser.links });
 
-    } else if (request.method === "GET") {
-      // Find the user by email
-      const user = await User.findOne({ email: userEmail });
-
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
+    } else if (method === "GET") {
       // Return the user's saved URLs (links)
       return NextResponse.json({ urls: user.links }, { status: 200 });
     } else {
@@ -57,5 +49,10 @@ export async function handler(request: NextRequest) {
   }
 }
 
-// Export for both GET and POST methods
-export { handler as GET, handler as POST };
+export async function GET(request: NextRequest) {
+  return handleRequest(request, "GET");
+}
+
+export async function POST(request: NextRequest) {
+  return handleRequest(request, "POST");
+}
