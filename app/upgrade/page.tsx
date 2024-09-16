@@ -41,11 +41,11 @@ const handleClick = async (planType) => {
 
   return (
     <div>
-       <div className="bg-[#232527] shadow-xl shadow-black min-h-screen flex flex-col items-center justify-center p-8">
-        <h1 className='font-bold text-4xl mb-4'>Plans</h1>
+       <div className="bg-white shadow-xl  min-h-screen flex flex-col items-center justify-center p-8">
+        <h1 className='font-bold text-4xl mb-4 text-black'>Plans</h1>
       <div className="max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Free Plan */}
-        <div className="  rounded-lg p-8 bg-[#35363B] shadow-2xl text-white">
+        <div className="  rounded-lg p-8 bg-[#d6d6d6]  shadow-2xl text-black">
           <h2 className="text-2xl font-bold mb-4">Free</h2>
           <p className="text-gray-400 mb-6">For freelancers</p>
           <p className="text-5xl font-bold mb-6">$0</p>
@@ -74,7 +74,7 @@ const handleClick = async (planType) => {
         </div>
 
         {/* Pro Plan */}
-        <div className=" rounded-lg p-8 bg-[#35363B] shadow-2xl text-white">
+        <div className=" rounded-lg p-8 bg-[#d6d6d6] shadow-2xl text-black">
           <h2 className="text-2xl font-bold mb-4">Pro</h2>
           <p className="text-gray-400 mb-6">For agencies</p>
           <p className="text-5xl font-bold mb-6">$40</p>

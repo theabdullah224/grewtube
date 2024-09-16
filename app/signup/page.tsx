@@ -91,18 +91,18 @@ const Signup = () => {
 
     <>
   {loading ? (
-    <div className="h-screen w-screen flex items-center justify-center bg-[#232527]">
+    <div className="h-screen w-screen flex items-center justify-center bg-white">
 
     <Image src={loader} alt="" className="w-52" /> 
     </div> 
 
 ) : (
-  <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
-      <div className="w-full max-w-sm bg-[#2B2D32] rounded-lg p-6 shadow-lg">
-        <h2 className="text-2xl font-semibold text-center text-white mb-4">
+  <div className="flex justify-center items-center min-h-screen bg-white shadow-xl ">
+      <div className="w-full max-w-sm bg-[#d6d6d6] text-black rounded-lg p-6 shadow-lg">
+        <h2 className="text-2xl font-semibold text-center text-black mb-4">
           Sign up with email
         </h2>
-        <p className="text-sm text-center text-gray-400 mb-6">
+        <p className="text-sm text-center text-black mb-6">
           Make a new doc to bring your word, data, and teams together. For free
         </p>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -167,19 +167,19 @@ const Signup = () => {
 
         <div className="flex items-center justify-center my-4">
           <div className="h-px bg-gray-600 w-full"></div>
-          <p className="text-sm text-gray-400 mx-4">
+          <p className="text-sm text-black mx-4">
             Or&nbsp;Sign&nbsp;Up&nbsp;with
           </p>
           <div className="h-px bg-gray-600 w-full"></div>
         </div>
         <div className="flex justify-center gap-4">
-          <button className="bg-[#2B2D32] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
+          <button className="bg-[#dfdfdf] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
             <FcGoogle className="w-4 h-4" />
           </button>
-          <button className="bg-[#2B2D32] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
+          <button className="bg-[#dfdfdf] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
             <FaFacebookF className="w-4 h-4 text-blue-600" />
           </button>
-          <button className="bg-[#2B2D32] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
+          <button className="bg-[#dfdfdf] shadow-xl h-fit py-2 px-6 rounded-md border-white transition duration-300">
             <FaApple className="w-4 h-4" />
           </button>
         </div>
