@@ -302,7 +302,6 @@ const Dashboard = () => {
       console.error("Error deleting URL:", error);
     }
   };
-<<<<<<< HEAD
 
   // ----------------Setting Tab----------------------------------------
   const [userData, setUserData] = useState({ username: "", email: "" });
@@ -326,24 +325,6 @@ const Dashboard = () => {
         body: JSON.stringify({ userId, oldPassword, newPassword }),
       });
 
-=======
-  
-// ----------------Setting Tab----------------------------------------
-const [userData, setUserData] = useState({ username: "", email: "" });
-const [currentPassword, setCurrentPassword] = useState('');
-const [newPassword, setNewPassword] = useState('');
-const [confirmPassword, setConfirmPassword] = useState('');
-const [successMessage, setSuccessMessage] = useState('');
-const [errorMessage, setErrorMessage] = useState('');
-const [showPasswordFields, setShowPasswordFields] = useState(false); // To toggle visibility of password fields
-const router = useRouter();
-
-// Fetch User Data
-useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("/api/users/me");
->>>>>>> 6fb070a6ac1b2c43ecce2a8d6d045060d624ded9
       const data = await response.json();
       if (response.ok) {
         console.log("Password changed successfully:", data.message);
@@ -355,7 +336,6 @@ useEffect(() => {
     }
   };
 
-<<<<<<< HEAD
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -404,94 +384,6 @@ useEffect(() => {
       setError("An error occurred while deleting the account.");
     }
   };
-=======
-  if (session) {
-    fetchUserData();
-  }
-}, [session]);
-
-// Handle Password Change
-const changePassword = async () => {
-  // Validate password length
-  if (newPassword.length < 6) {
-    setErrorMessage("New password must be at least 6 characters long.");
-    return;
-  }
-
-  // Ensure newPassword matches confirmPassword
-  if (newPassword !== confirmPassword) {
-    setErrorMessage("New password and confirmation do not match.");
-    return;
-  }
-
-  const userId = session?.user?.id;
-
-  if (!userId) {
-    setErrorMessage("User ID not found. Please log in.");
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/users/changePassword', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        oldPassword: currentPassword,
-        newPassword,
-      }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      setSuccessMessage('Password changed successfully.');
-      setErrorMessage('');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-
-      // Redirect to login page after password change
-      await signOut({ redirect: false });
-      router.push("/login");
-    } else {
-      setErrorMessage(data.error || 'Failed to change password.');
-    }
-  } catch (error) {
-    setErrorMessage('An error occurred while changing the password.');
-    console.error('Error making request:', error);
-  }
-};
-
-const handleLogout = async () => {
-  await signOut({ redirect: false });
-  router.push("/login");
-};
-
-// Handle Delete Account
-const handleDeleteAccount = async () => {
-  const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
-
-  if (!confirmed) return;
-
-  try {
-    const response = await fetch("/api/users/deleteAccount", {
-      method: "DELETE",
-    });
-
-    if (response.ok) {
-      router.push("/signup");
-    } else {
-      const data = await response.json();
-      setErrorMessage(data.error || "Failed to delete account.");
-    }
-  } catch (error) {
-    setErrorMessage("An error occurred while deleting the account.");
-  }
-};
-// ----------------------------------------------------------------------
->>>>>>> 6fb070a6ac1b2c43ecce2a8d6d045060d624ded9
 
   // ----------------------------------------------------------------------
 
@@ -564,7 +456,7 @@ const handleDeleteAccount = async () => {
                         {title}
                       </h3>
                     </div>
-                    <div className="bg-white shadow-md  p-4 lg:p-8 rounded-lg text-black   flex flex-col items-center justify-center">
+                    <div className="bg-white shadow-md  p-4 lg:p-8 rounded-2xl text-black   flex flex-col items-center justify-center">
                       
                       <span className="font-bold text-lg ">Views</span>
                       <h3 className=" font-bold  mb-4 text-3xl text-black break-words text-wrap">
@@ -572,7 +464,7 @@ const handleDeleteAccount = async () => {
                       </h3>
                     </div>
 
-                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-lg flex items-center justify-center">
+                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-2xl flex items-center justify-center">
                       <div className=" w-full max-w-[20rem]">
                         <h3 className="text-lg font-bold mb-4 text-black">
                           Comments
@@ -602,20 +494,20 @@ const handleDeleteAccount = async () => {
                       </div>
                     </div>
 
-                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-lg text-black flex flex-col items-center justify-center">
+                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-2xl text-black flex flex-col items-center justify-center">
                       <span className="font-bold text-lg ">Likes</span>
                       <h3 className="font-bold  mb-4 text-3xl text-black break-words text-wrap">
                         {like}
                       </h3>
                     </div>
-                    <div className=" bg-gradient-to-b from-white via-[#fff3f0] to-white shadow-md p-4 lg:p-6 rounded-lg flex flex-col items-center justify-center">
+                    <div className=" bg-gradient-to-b from-white via-[#fff3f0] to-white shadow-md p-4 lg:p-6 rounded-2xl flex flex-col items-center justify-center">
                       <span className="font-bold text-lg ">Sentiment</span>
                       <h3 className="font-bold  mb-4 text-3xl text-black break-words text-wrap">
                         {sentiment}
                       </h3>
                     </div>
 
-                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-lg">
+                    <div className="bg-white shadow-md p-4 lg:p-6 rounded-2xl">
                       <h2 className="text-center text-black text-lg mb-4 font-bold">
                         Comment Sentiment Analysis
                       </h2>
@@ -640,17 +532,17 @@ const handleDeleteAccount = async () => {
                   <Image src={Spinner} alt="Loading..." className="w-52" />
                 </div>
               ) : (
-                <div className="border-gray-300 rounded-lg p-4 h-full">
+                <div className="border-gray-300 rounded-2xl p-4 h-full">
                   <div className="flex space-x-4 mb-4">
                     <input
-                      className="bg-transparent border-2 border-gray-400 rounded-lg placeholder-gray-400 text-black py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                      className="bg-transparent border-2 border-gray-400 rounded-2xl placeholder-gray-400 text-black py-2 px-4 w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
                       type="url"
                       placeholder="Enter YouTube URL..."
                       value={inputUrl}
                       onChange={(e) => setInputUrl(e.target.value)}
                     />
                     <button
-                      className="bg-[#D6D6D6] shadow-md  text-black font-bold py-2 px-6 rounded-lg hover:bg-[#bdbdbd] transition duration-300"
+                      className="bg-[#D6D6D6] shadow-md  text-black font-bold py-2 px-6 rounded-2xl hover:bg-[#bdbdbd] transition duration-300"
                       onClick={handleAddUrl}
                     >
                       Add
@@ -662,7 +554,7 @@ const handleDeleteAccount = async () => {
                     </>
                   )}
 
-                  <div className="history bg-[#d6d6d6] p-4 rounded-lg text-black">
+                  <div className="history bg-[#d6d6d6] p-4 rounded-2xl text-black">
                     {history.map((item) => (
                       <div
                         key={item._id}
@@ -699,13 +591,12 @@ const handleDeleteAccount = async () => {
             </div>
           )}
 
-<<<<<<< HEAD
           {/* --------------------------Setting---------------------------------------------------------------------------- */}
 
           {activeTab === "Setting" && session && (
             <div className="text-black">
               {/* <h2>Setting Section</h2> */}
-              <div className="w-full flex flex-col items-center p-6 bg-white min-h-screen">
+              <div className="w-full flex flex-col items-center p-6 bg-white min-h-screen rounded-2xl">
                 {/* User Profile Section */}
                 <div className="flex flex-col items-center mb-6">
                   {/* Yellow circle instead of user image */}
@@ -722,115 +613,31 @@ const handleDeleteAccount = async () => {
                 {/* Settings Options */}
                 <div className="w-full max-w-sm">
                   <button
-                    className="w-full bg-white text-black font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+                    className="w-full bg-white text-black font-bold py-2 px-6 mb-3 rounded-2xl border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
                     onClick={changePassword} // Change to your change password route
                   >
                     Change Password
                   </button>
 
                   <button
-                    className="w-full bg-white text-black font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
+                    className="w-full bg-white text-black font-bold py-2 px-6 mb-3 rounded-2xl border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
                     onClick={handleLogout}
                   >
                     Logout
                   </button>
 
                   <button
-                    className="w-full bg-red-500 text-black font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300 text-left"
+                    className="w-full bg-red-500 text-black font-bold py-2 px-6 rounded-2xl hover:bg-red-600 transition duration-300 text-left"
                     onClick={handleDeleteAccount}
                   >
                     Delete Account
                   </button>
                 </div>
-=======
-  {/* --------------------------Setting---------------------------------------------------------------------------- */}
-<div className="text-black">
-      {activeTab === "Setting" && (
-        <div className="w-full flex flex-col items-center p-6 bg-black min-h-screen">
-          {/* User Profile Section */}
-          <div className="flex flex-col items-center mb-6">
-            <h2 className="text-2xl font-bold mt-4 text-white">
-              {userData.username || "Username"}
-            </h2>
-            <p className="text-gray-400">{userData.email || "user@example.com"}</p>
-          </div>
-
-          {/* Settings Options */}
-          <div className="w-full max-w-sm">
-            {/* Change Password Button */}
-            {!showPasswordFields && (
-              <button
-                className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-                onClick={() => setShowPasswordFields(true)} // Show password fields on click
-              >
-                Change Password
-              </button>
-            )}
-
-            {/* Show password fields when the button is clicked */}
-            {showPasswordFields && (
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Change Password</h3>
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full mb-3 p-2 border rounded"
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full mb-3 p-2 border rounded"
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm New Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full mb-3 p-2 border rounded"
-                />
-                <button
-                  className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300"
-                  onClick={changePassword}
-                >
-                  Submit
-                </button>
-
-                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-                {successMessage && <p className="text-green-500">{successMessage}</p>}
->>>>>>> 6fb070a6ac1b2c43ecce2a8d6d045060d624ded9
               </div>
             </div>
           )}
 
-<<<<<<< HEAD
           {/* --------------------------------------------------------------------------------------------------------------- */}
-=======
-            {/* Logout Button */}
-            <button
-              className="w-full bg-black text-white font-bold py-2 px-6 mb-3 rounded-lg border border-gray-600 hover:bg-gray-800 transition duration-300 text-left"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-
-            {/* Delete Account Button */}
-            <button
-              className="w-full bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-300"
-              onClick={handleDeleteAccount}
-            >
-              Delete Account
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-
-  {/* --------------------------------------------------------------------------------------------------------------- */}
->>>>>>> 6fb070a6ac1b2c43ecce2a8d6d045060d624ded9
         </div>
       </div>
     </div>
