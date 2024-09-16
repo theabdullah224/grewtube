@@ -7,6 +7,8 @@ import men from '../../public/men.svg';
 import emailIcon from '../../public/email.svg';
 import lock from '../../public/lock.svg';
 import { useRouter } from "next/navigation";
+import loader from '@/public/Spinner@1x-1.0s-200px-200px.svg'
+
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,7 @@ const Signup = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setloading] = useState(false)
   const router = useRouter();
 
   // Validate email format
@@ -55,6 +58,7 @@ const Signup = () => {
     }
 
     try {
+      setloading(true)
       const response = await fetch('/api/users/signup', {
         method: 'POST',
         headers: {
@@ -78,11 +82,22 @@ const Signup = () => {
     } catch (error) {
       setError("An error occurred. Please try again.");
       console.error("Signup error:", error);
+    }finally{
+      setloading(false)
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
+
+    <>
+  {loading ? (
+    <div className="h-screen w-screen flex items-center justify-center bg-[#232527]">
+
+    <Image src={loader} alt="" className="w-52" /> 
+    </div> 
+
+) : (
+  <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
       <div className="w-full max-w-sm bg-[#2B2D32] rounded-lg p-6 shadow-lg">
         <h2 className="text-2xl font-semibold text-center text-white mb-4">
           Sign up with email
@@ -98,7 +113,7 @@ const Signup = () => {
               src={men}
               alt=""
               className="absolute top-1/2 w-5 left-4 transform -translate-y-1/2 -translate-x-1/2"
-            />
+              />
             <input
               type="text"
               id="username"
@@ -107,14 +122,14 @@ const Signup = () => {
               onChange={handleChange}
               className="w-full px-6 pl-8 py-1 bg-white text-[#2B2D32] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
+              />
           </div>
           <div className="mb-2 relative">
             <Image
               src={emailIcon}
               alt=""
               className="absolute top-1/2 w-4 left-4 transform -translate-y-1/2 -translate-x-1/2"
-            />
+              />
             <input
               type="email"
               id="email"
@@ -123,14 +138,14 @@ const Signup = () => {
               onChange={handleChange}
               className="w-full px-6 pl-8 py-1 bg-white text-[#2B2D32] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
+              />
           </div>
           <div className="mb-2 relative">
             <Image
               src={lock}
               alt=""
               className="absolute top-1/2 w-4 left-4 transform -translate-y-1/2 -translate-x-1/2"
-            />
+              />
             <input
               type="password"
               id="password"
@@ -139,13 +154,13 @@ const Signup = () => {
               onChange={handleChange}
               className="w-full px-6 pl-8 py-1 bg-white text-[#2B2D32] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
+              />
           </div>
 
           <button
             type="submit"
             className="w-full bg-[#F8EF6D] text-black font-bold py-2 rounded-md hover:bg-yellow-400 transition duration-300"
-          >
+            >
             Sign up
           </button>
         </form>
@@ -170,6 +185,10 @@ const Signup = () => {
         </div>
       </div>
     </div>
+)}
+
+   
+            </>
   );
 };
 

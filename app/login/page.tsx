@@ -6,6 +6,9 @@ import Image from "next/image";
 import emailIcon from '../../public/email.svg';
 import lock from '../../public/lock.svg';
 import Link from "next/link";
+import loader from '@/public/Spinner@1x-1.0s-200px-200px.svg'
+
+
 
 // Hardcoded admin credentials
 const ADMIN_EMAIL = "admin@gmail.com";
@@ -14,6 +17,7 @@ const ADMIN_PASSWORD = "123456";
 const LoginSignup = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [loading, setloading] = useState(false)
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +63,7 @@ const LoginSignup = () => {
   // Function to check if a user exists in the database
   const checkIfUserExists = async (email: string, password: string) => {
     try {
+      setloading(true)
       const response = await fetch('/api/users/checkUser', {
         method: 'POST',
         headers: {
@@ -76,12 +81,21 @@ const LoginSignup = () => {
     } catch (error) {
       console.error("Error checking user:", error);
       return false;
+    }finally{
+      setloading(false)
     }
   };
 
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
+    <>
+    {loading ? (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#232527]">
+
+      <Image src={loader} alt="" className="w-52" /> 
+      </div>
+) : (
+  <div className="flex justify-center items-center min-h-screen bg-[#232527] shadow-xl shadow-black">
       <div className="w-full max-w-sm bg-[#2B2D32] rounded-lg p-6 shadow-lg">
         <h2 className="text-2xl font-semibold text-center text-white mb-4">
           Sign in with email
@@ -111,7 +125,7 @@ const LoginSignup = () => {
               value={formData.password}
               onChange={handleChange}
               className="w-full px-6 pl-8 py-1 bg-white text-[#2B2D32] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              />
           </div>
           <button type="submit" className="w-full bg-[#F8EF6D] text-black font-bold py-2 rounded-md hover:bg-yellow-400 transition duration-300">
             Sign in
@@ -129,6 +143,9 @@ const LoginSignup = () => {
         </div>
       </div>
     </div>
+)}
+    
+              </>
   );
 };
 
