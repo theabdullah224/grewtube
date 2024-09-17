@@ -1,22 +1,11 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/models/userModel";
 import { connect } from "@/dbConfig/dbConfig";
 
-interface CustomUser {
-  id: string;
-  email: string;
-  role: string;
-}
-
-declare module "next-auth" {
-  interface Session {
-    user: CustomUser;
-  }
-}
-
-export const authOptions: NextAuthOptions = {
+// Define the NextAuth options
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -42,11 +31,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid email or password.");
         }
 
-        return { 
-          id: user._id.toString(), 
-          email: user.email, 
-          role: user.role 
-        };
+        return { id: user._id.toString(), email: user.email, role: user.role };
       },
     }),
   ],
@@ -78,5 +63,8 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+// Create the GET and POST handlers for NextAuth
 const handler = NextAuth(authOptions);
+
+// Export GET and POST handlers
 export { handler as GET, handler as POST };
