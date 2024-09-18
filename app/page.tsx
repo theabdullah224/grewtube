@@ -512,7 +512,9 @@ const Dashboard = () => {
                         Comment Sentiment Analysis
                       </h2>
                       <ChartComponent
-                        positivechart={positivecomments}
+                      //@ts-ignore
+                      positivechart={positivecomments}
+                      //@ts-ignore
                         negativechart={negativecomments}
                       />
                     </div>
