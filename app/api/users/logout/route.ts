@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Your NextAuth configuration
+import { authOptions } from "@/app/api/auth/[..nextauth]"; // Your NextAuth configuration
 
 export async function POST(request: Request) {
   try {
