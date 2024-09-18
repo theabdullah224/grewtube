@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-08-01', // Use the API version you're working with
+  apiVersion: '2024-06-20', // Use the API version you're working with
 });
 
 export async function POST(request: Request) {
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error(`Error creating payment session: ${error.message}`);
+    //@ts-ignore
     if (error instanceof Stripe.StripeError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
