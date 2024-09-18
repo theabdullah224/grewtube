@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/models/userModel";
 import { connect } from "@/dbConfig/dbConfig";
 
 // Define the NextAuth options
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -39,15 +39,19 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+
         token.email = user.email;
+        // @ts-ignore
         token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
+        // @ts-ignore
         session.user.id = token.id as string;
         session.user.email = token.email as string;
+        // @ts-ignore
         session.user.role = token.role as string;
       }
       return session;
